@@ -22,4 +22,4 @@ upload: set_user build
 reload: upload
 	pipx upgrade $(program-name)
 	pipx upgrade $(program-name)
-	$(program-name) --version . .
+	$(program-name) --version .

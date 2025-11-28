@@ -8,7 +8,7 @@ version = "2025.10.21" # version
 authors = [
     { name = "Guenthner", email = "guenthner.jonathan@gmail.com" },
 ]
-description = "I was interested when people were washing their laundry in my apartment complex. This matches an exported whatsapp chat to produce an overview of matches over time."
+description = "I was interested when people were washing their laundry in my apartment complex. This matches a regex against an exported whatsapp chat to produce an overview of matches over time."
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
