@@ -68,6 +68,6 @@ def main():
         log.info(f"{PROGRAM_NAME} version {program_version}")
         return
 
-    regex = None if args.regex is None else re.compile(args.regex, re.DOTALL)
+    regex = None if args.regex is None else re.compile(args.regex, re.DOTALL | re.IGNORECASE)
 
     print(*get_matches(Path(args.INPUT).read_text(), regex), sep="\n")

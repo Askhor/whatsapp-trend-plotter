@@ -1,6 +1,10 @@
 py=.venv/bin/python
+pip=.venv/bin/pip
 user=guenthner
 program-name=whatsapp-trend-plotter
+
+install_dependencies:
+	$(pip) install build hatchling twine
 
 set_user:
 	cp ~/.pypirc_$(user) ~/.pypirc
@@ -12,7 +16,7 @@ version:
 	vinc
 
 clean:
-	mkdir dist
+	mkdir dist -p
 	touch dist/fuck
 	rm dist/*
 
