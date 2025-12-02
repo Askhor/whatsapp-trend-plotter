@@ -25,6 +25,10 @@ def color_start(color):
     return f"\x1b[38;5;{color}m"
 
 
+def bg_rgb_start(r, g, b):
+    return f"\033[48;2;{r};{g};{b}m"
+
+
 def color_end():
     return f"\x1b[m"
 
