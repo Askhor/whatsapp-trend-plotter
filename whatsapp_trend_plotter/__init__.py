@@ -76,8 +76,9 @@ def show_week_overview(matches, numeric):
         for i, line in enumerate(buckets):
             print("Mo,Tu,We,Th,Fr,Sa,Su".split(",")[i], *map(lambda n: f"{n:2}", line))
     else:
-        print("  ", *map(lambda n: f"{n * 3:2}", range(8)))
         maximum = max(max(l) for l in buckets)
+        print(f"Maximum number per bucket: {maximum}")
+        print("  ", *map(lambda n: f"{n * 3:2}", range(8)))
 
         def color(n):
             x = int(n / maximum * 255)
