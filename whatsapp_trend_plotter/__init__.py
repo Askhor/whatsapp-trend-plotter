@@ -49,6 +49,8 @@ def command_entry_point():
 
 
 def show_matches(matches, show):
+    print(f"Found {len(matches)} entries")
+
     for message in matches:
         output = []
         if 1 in show:
@@ -119,7 +121,7 @@ def main():
 
     regex = None if args.regex is None else re.compile(args.regex, re.DOTALL | re.IGNORECASE)
     show = set(map(int, args.show.split(",")))
-    matches = get_matches(Path(args.INPUT).read_text(), regex)
+    matches = list(get_matches(Path(args.INPUT).read_text(), regex))
 
     if args.week_overview:
         show_week_overview(matches, args.numeric)
