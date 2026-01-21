@@ -4,6 +4,7 @@ import logging
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Callable
 
 from .terminal_formatting import parse_color, bg_rgb_start, color_end
 from .version import program_version
@@ -18,7 +19,7 @@ log.addHandler(console)
 log.setLevel(logging.DEBUG)
 console.setFormatter(
     logging.Formatter(parse_color("{asctime} [ℂ3.{levelname:>5}ℂ.] ℂ4.{name}ℂ.: {message}"),
-                      style="{", datefmt="%W %a %I:%M"))
+                      style="{", datefmt="W%W %a %I:%M"))
 
 
 @dataclass
@@ -63,34 +64,53 @@ def show_matches(matches, show):
         print(*output, sep=" ")
 
 
-def show_week_overview(matches, numeric):
-    buckets = [[0] * 24 for _ in range(7)]
+def show_arbitrary_overview(matches, numeric, x: Callable, y: Callable, width, rows, columns=None):
+    if columns is None:
+        columns = [f"{i:2}" for i in range(width)]
+
+    buckets = [[0] * width for _ in rows]
 
     for match in matches:
-        day = match.time.weekday()
-        hour = match.time.hour
-
-        buckets[day][hour] += 1
+        buckets[y(match)][x(match)] += 1
 
     if numeric:
-        print("  ", *map(lambda n: f"{n:2}", range(24)))
-
-        for i, line in enumerate(buckets):
-            print("Mo,Tu,We,Th,Fr,Sa,Su".split(",")[i], *map(lambda n: f"{n:2}", line))
+        # Print column headers
+        print(" " * len(rows[0]), *columns)
+        for r, b in zip(rows, buckets):
+            print(r, *map(lambda n: f"{n:2}", b))
     else:
         maximum = max(max(l) for l in buckets)
         print(f"Maximum number per bucket: {maximum}")
-        print("  ", *map(lambda n: f"{n * 3:2}", range(8)))
 
-        def color(n):
-            x = int(n / maximum * 255)
-            return bg_rgb_start(x, 0, 255 - x)
+        # Print column headers
+        print(end=" " * len(rows[0]))
+        for index, c in enumerate(columns):
+            if index % 3 == 2:
+                print(end=" " + c)
+        print()
+
+        def color(intensity):
+            rel_int = int(intensity / maximum * 255)
+            return bg_rgb_start(rel_int, 0, 255 - rel_int)
 
         for i, line in enumerate(buckets):
             print(end="Mo,Tu,We,Th,Fr,Sa,Su".split(",")[i])
-            for n in line:
-                print(end=color(n) + " ")
+            for value in line:
+                print(end=color(value) + " ")
             print(color_end())
+
+
+def show_week_overview(matches, numeric):
+    show_arbitrary_overview(matches, numeric,
+                            lambda m: m.time.hour, lambda m: m.time.weekday(), 24,
+                            "Mo,Tu,We,Th,Fr,Sa,Su".split(","))
+
+
+def show_annual_overview(matches, numeric):
+
+    show_arbitrary_overview(matches, numeric,
+                            lambda m: m.time.isocalendar()[1], lambda m: m.time.weekday(), 53,
+                            "Mo,Tu,We,Th,Fr,Sa,Su".split(","))
 
 
 def main():
@@ -106,6 +126,8 @@ def main():
                         help="What data to show for each message: 1 for time, 2 for telephone number and 3 for text. (1,2,3 is the default)")
     parser.add_argument("-w", "--week-overview", action="store_true",
                         help="Show an overview of when in the week the matches happen.")
+    parser.add_argument("-a", "--annual-overview", action="store_true",
+                        help="Show an overview of when in the year the matches happen.")
     parser.add_argument("-n", "--numeric", action="store_true",
                         help="Show the week overview with concrete numbers instead of colors")
     parser.add_argument("INPUT", help="Export file to parse")
@@ -123,7 +145,9 @@ def main():
     show = set(map(int, args.show.split(",")))
     matches = list(get_matches(Path(args.INPUT).read_text(), regex))
 
-    if args.week_overview:
+    if args.annual_overview:
+        show_annual_overview(matches, args.numeric)
+    elif args.week_overview:
         show_week_overview(matches, args.numeric)
     else:
         show_matches(matches, show)
