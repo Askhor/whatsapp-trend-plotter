@@ -1,3 +1,5 @@
+# PYTHON_ARGCOMPLETE_OK
+
 import argparse
 import datetime
 import logging
@@ -5,6 +7,8 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
+
+import argcomplete
 
 from .terminal_formatting import parse_color, bg_rgb_start, color_end
 from .version import program_version
@@ -107,7 +111,6 @@ def show_week_overview(matches, numeric):
 
 
 def show_annual_overview(matches, numeric):
-
     show_arbitrary_overview(matches, numeric,
                             lambda m: m.time.isocalendar()[1], lambda m: m.time.weekday(), 53,
                             "Mo,Tu,We,Th,Fr,Sa,Su".split(","))
@@ -132,6 +135,7 @@ def main():
                         help="Show the week overview with concrete numbers instead of colors")
     parser.add_argument("INPUT", help="Export file to parse")
 
+    argcomplete.autocomplete(parser)
     args = parser.parse_args()
 
     log.setLevel(logging.DEBUG if args.verbose else logging.INFO)
